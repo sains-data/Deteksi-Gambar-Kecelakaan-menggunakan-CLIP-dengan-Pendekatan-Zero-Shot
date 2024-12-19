@@ -1,1 +1,854 @@
+# Preprocessing
+import os
+from PIL import Image
+import numpy as np
+import torch
+from transformers import CLIPProcessor, CLIPModel
+import matplotlib.pyplot as plt
+import pandas as pd
+from IPython.display import Image, display
+from sklearn.metrics.pairwise import cosine_similarity
 
+## Resize
+input_folder = "/content/drive/MyDrive/DATA PENGPOL/data/train/Accident"
+output_folder = "/content/drive/MyDrive/DATA PENGPOL/data/train resize/Accident"
+os.makedirs(output_folder, exist_ok=True)
+
+# Ukuran baru untuk resize
+resize_size = (224, 224)
+
+# Fungsi untuk resize gambar
+def resize_image(input_path, output_path, size):
+    with Image.open(input_path) as img:
+        img_resized = img.resize(size)
+        img_resized.save(output_path)
+
+# Loop melalui semua file dalam folder input
+for file_name in os.listdir(input_folder):
+    input_path = os.path.join(input_folder, file_name)
+    output_path = os.path.join(output_folder, file_name)
+
+    # Skip jika file bukan gambar
+    if not file_name.lower().endswith((".png", ".jpg", ".jpeg", ".bmp", ".tiff")):
+        print(f"Skipping non-image file: {file_name}")
+        continue
+
+    # Resize dan simpan gambar
+    try:
+        resize_image(input_path, output_path, resize_size)
+        print(f"Resized and saved: {output_path}")
+    except Exception as e:
+        print(f"Failed to process {file_name}: {e}")
+
+print("Semua gambar telah diresize dan disimpan di folder output.")
+
+# Path ke folder input dan output
+input_folder = "/content/drive/MyDrive/DATA PENGPOL/data/train/Non Accident"
+output_folder = "/content/drive/MyDrive/DATA PENGPOL/data/train resize/Non Accident"
+os.makedirs(output_folder, exist_ok=True)
+
+# Ukuran baru untuk resize
+resize_size = (224, 224)
+def resize_image(input_path, output_path, size):
+    with Image.open(input_path) as img:
+        img_resized = img.resize(size)
+        img_resized.save(output_path)
+
+# Loop melalui semua file dalam folder input
+for file_name in os.listdir(input_folder):
+    input_path = os.path.join(input_folder, file_name)
+    output_path = os.path.join(output_folder, file_name)
+
+    # Skip jika file bukan gambar
+    if not file_name.lower().endswith((".png", ".jpg", ".jpeg", ".bmp", ".tiff")):
+        print(f"Skipping non-image file: {file_name}")
+        continue
+
+    # Resize dan simpan gambar
+    try:
+        resize_image(input_path, output_path, resize_size)
+        print(f"Resized and saved: {output_path}")
+    except Exception as e:
+        print(f"Failed to process {file_name}: {e}")
+
+print("Semua gambar telah diresize dan disimpan di folder output.")
+
+## normalisasi
+# Path folder input dan output
+input_folder = "/content/drive/MyDrive/DATA PENGPOL/data/train resize/Accident"
+output_folder = "/content/drive/MyDrive/DATA PENGPOL/data/train normalisasi/Accident"
+os.makedirs(output_folder, exist_ok=True)
+
+# Fungsi untuk normalisasi gambar ke rentang [0, 1]
+def normalize_image(image_array, mean=0.5, std=0.5):
+    """
+    Normalisasi gambar ke rentang [-1, 1] atau sesuai mean/std.
+    Args:
+        image_array (numpy.ndarray): Array gambar.
+        mean (float): Mean untuk normalisasi.
+        std (float): Standard deviation untuk normalisasi.
+    Returns:
+        numpy.ndarray: Gambar yang telah dinormalisasi.
+    """
+    image_array = image_array / 255.0
+    image_array = (image_array - mean) / std
+    return image_array
+
+def process_and_save_image(input_path, output_path, mean, std):
+    with Image.open(input_path) as img:
+        img_array = np.array(img)
+        normalized_array = normalize_image(img_array, mean, std)
+        normalized_array = ((normalized_array * 0.5 + 0.5) * 255).astype(np.uint8)
+        normalized_img = Image.fromarray(normalized_array)
+        normalized_img.save(output_path)
+        print(f"Processed and saved: {output_path}")
+
+# Loop untuk mengolah semua gambar dalam folder input
+for file_name in os.listdir(input_folder):
+    input_path = os.path.join(input_folder, file_name)
+    output_path = os.path.join(output_folder, file_name)
+
+    # Skip jika file bukan gambar
+    if not file_name.lower().endswith((".png", ".jpg", ".jpeg")):
+        continue
+
+    # Proses gambar dan simpan ke folder output
+    try:
+        process_and_save_image(input_path, output_path, mean=0.5, std=0.5)
+    except Exception as e:
+        print(f"Failed to process {input_path}: {e}")
+
+print("Semua gambar telah dinormalisasi dan disimpan di folder output.")
+
+# Path folder input dan output
+input_folder = "/content/drive/MyDrive/DATA PENGPOL/data/train resize/Non Accident"
+output_folder = "/content/drive/MyDrive/DATA PENGPOL/data/train normalisasi/Non Accident"
+os.makedirs(output_folder, exist_ok=True)
+
+# Fungsi untuk normalisasi gambar ke rentang [0, 1]
+def normalize_image(image_array, mean=0.5, std=0.5):
+    """
+    Normalisasi gambar ke rentang [-1, 1] atau sesuai mean/std.
+    Args:
+        image_array (numpy.ndarray): Array gambar.
+        mean (float): Mean untuk normalisasi.
+        std (float): Standard deviation untuk normalisasi.
+    Returns:
+        numpy.ndarray: Gambar yang telah dinormalisasi.
+    """
+    image_array = image_array / 255.0
+    image_array = (image_array - mean) / std
+    return image_array
+
+# Fungsi untuk memproses dan menyimpan gambar
+def process_and_save_image(input_path, output_path, mean, std):
+    with Image.open(input_path) as img:
+        img_array = np.array(img)
+        normalized_array = normalize_image(img_array, mean, std)
+        normalized_array = ((normalized_array * 0.5 + 0.5) * 255).astype(np.uint8)
+        normalized_img = Image.fromarray(normalized_array)
+        normalized_img.save(output_path)
+        print(f"Processed and saved: {output_path}")
+
+# Loop untuk mengolah semua gambar dalam folder input
+for file_name in os.listdir(input_folder):
+    input_path = os.path.join(input_folder, file_name)
+    output_path = os.path.join(output_folder, file_name)
+
+    # Skip jika file bukan gambar
+    if not file_name.lower().endswith((".png", ".jpg", ".jpeg")):
+        continue
+
+    # Proses gambar dan simpan ke folder output
+    try:
+        process_and_save_image(input_path, output_path, mean=0.5, std=0.5)
+    except Exception as e:
+        print(f"Failed to process {input_path}: {e}")
+
+print("Semua gambar telah dinormalisasi dan disimpan di folder output.")
+
+# Kandidat similarity tertinggi
+## Accident
+#Load Model and Processor
+model_name = "openai/clip-vit-base-patch32"
+model = CLIPModel.from_pretrained(model_name)
+processor = CLIPProcessor.from_pretrained(model_name)
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model.to(device)
+
+#Load Dataset
+image_folder = "/content/drive/MyDrive/DATA PENGPOL/data/train normalisasi/Accident"  # Ganti dengan path folder gambar
+image_paths = [os.path.join(image_folder, fname) for fname in os.listdir(image_folder) if fname.endswith(".jpg")]
+
+#Define Relevant Captions (Labels)
+descriptions = [
+    "A car accident on a road",
+    "A car accident involving multiple vehicles",
+    "A motorcycle accident involving multiple vehicles",
+    "A damaged vehicle after a collision",
+    "An overturned car on the highway",
+    "A car was hit by a truck",
+    "A car was crushed by rocks",
+    "The car crashed into a pedestrian crossing",
+    "The car hit the road divider",
+    "The truck skidded on the road"
+]
+
+#Function to Calculate Probabilities
+def calculate_probabilities(image_path, descriptions):
+    image = Image.open(image_path).convert("RGB")
+    inputs = processor(text=descriptions, images=image, return_tensors="pt", padding=True)
+    inputs = {key: val.to(device) for key, val in inputs.items()}
+    outputs = model(**inputs)
+
+    # Calculate cosine similarity
+    logits_per_image = outputs.logits_per_image  # Image-to-text similarity
+    probs = logits_per_image.softmax(dim=1)  # Convert to probabilities
+    return probs.squeeze().tolist()
+
+#Function to Visualize Probabilities
+def plot_probabilities(descriptions, probabilities, image_path):
+    plt.figure(figsize=(10, 6))
+    plt.barh(descriptions, probabilities, color="skyblue")
+    plt.xlabel("Probability", fontsize=12)
+    plt.ylabel("Descriptions", fontsize=12)
+    plt.title("CLIP Probabilities for Image Descriptions", fontsize=14)
+    plt.xlim(0, 1)
+    plt.gca().invert_yaxis()
+    plt.tight_layout()
+
+    # Display image next to plot
+    img = Image.open(image_path)
+    plt.figure(figsize=(5, 5))
+    plt.imshow(img)
+    plt.axis("off")
+    plt.title("Input Image")
+    plt.show()
+
+results = []
+
+for image_path in image_paths:
+    probabilities = calculate_probabilities(image_path, descriptions)
+    print(f"Image: {os.path.basename(image_path)}")
+
+    #description with the highest probability
+    max_prob_idx = probabilities.index(max(probabilities))
+    best_description = descriptions[max_prob_idx]
+    highest_probability = probabilities[max_prob_idx]
+    plot_probabilities(descriptions, probabilities, image_path)
+
+#Save Results to CSV
+df = pd.DataFrame(results, columns=["Image Path", "Best Description", "Highest Probability"])
+output_csv = "clip_probabilities.csv"
+df.to_csv(output_csv, index=False)
+
+print(f"Results have been saved to {output_csv}")
+
+## Non Accident
+#Load Model and Processor
+model_name = "openai/clip-vit-base-patch32"
+model = CLIPModel.from_pretrained(model_name)
+processor = CLIPProcessor.from_pretrained(model_name)
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model.to(device)
+
+#Load Dataset
+image_folder = "/content/drive/MyDrive/DATA PENGPOL/data/train normalisasi/Non Accident"  # Ganti dengan path folder gambar
+image_paths = [os.path.join(image_folder, fname) for fname in os.listdir(image_folder) if fname.endswith(".jpg")]
+
+#Define Relevant Captions (Labels)
+
+descriptions  = [
+    "A calm street with clear traffic",
+    "A mountain landscape with no traffic",
+    "A busy street with no accidents",
+    "street view after rain with no accidents",
+    "A car parked on the side of the road",
+    "a car was driving on the road safely",
+    "many cars parked on the side of the road"
+]
+
+
+#Function to Calculate Probabilities
+def calculate_probabilities(image_path, descriptions):
+    image = Image.open(image_path).convert("RGB")
+    inputs = processor(text=descriptions, images=image, return_tensors="pt", padding=True)
+    inputs = {key: val.to(device) for key, val in inputs.items()}
+    outputs = model(**inputs)
+
+    # Calculate cosine similarity
+    logits_per_image = outputs.logits_per_image  # Image-to-text similarity
+    probs = logits_per_image.softmax(dim=1)  # Convert to probabilities
+    return probs.squeeze().tolist()
+
+#Function to Visualize Probabilities
+def plot_probabilities(descriptions, probabilities, image_path):
+    plt.figure(figsize=(10, 6))
+    plt.barh(descriptions, probabilities, color="skyblue")
+    plt.xlabel("Probability", fontsize=12)
+    plt.ylabel("Descriptions", fontsize=12)
+    plt.title("CLIP Probabilities for Image Descriptions", fontsize=14)
+    plt.xlim(0, 1)
+    plt.gca().invert_yaxis()
+    plt.tight_layout()
+
+    # Display image next to plot
+    img = Image.open(image_path)
+    plt.figure(figsize=(5, 5))
+    plt.imshow(img)
+    plt.axis("off")
+    plt.title("Input Image")
+    plt.show()
+
+results = []
+
+for image_path in image_paths:
+    probabilities = calculate_probabilities(image_path, descriptions)
+    print(f"Image: {os.path.basename(image_path)}")
+
+    #description with the highest probability
+    max_prob_idx = probabilities.index(max(probabilities))
+    best_description = descriptions[max_prob_idx]
+    highest_probability = probabilities[max_prob_idx]
+    results.append([image_path, best_description, highest_probability])
+    plot_probabilities(descriptions, probabilities, image_path)
+
+#Save Results to CSV
+df = pd.DataFrame(results, columns=["Image Path", "Best Description", "Highest Probability"])
+output_csv = "clip_probabilities_nonacc.csv"
+df.to_csv(output_csv, index=False)
+
+print(f"Results have been saved to {output_csv}")
+
+# sampel dan metrix evaluasi
+## accident probability softmax
+image_path = "/content/drive/MyDrive/DATA PENGPOL/data/train normalisasi/Accident/acc1 (5).jpg"
+display(Image(filename=image_path))
+#Load Model and Processor
+model_name = "openai/clip-vit-base-patch32"
+model = CLIPModel.from_pretrained(model_name)
+processor = CLIPProcessor.from_pretrained(model_name)
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model.to(device)
+
+#Load Single Image
+image_path = "/content/drive/MyDrive/DATA PENGPOL/data/train normalisasi/Accident/acc1 (5).jpg"  # Ganti dengan path gambar yang ingin diuji
+
+#Define Relevant Captions (Labels)
+descriptions = [
+    "A car accident on a road",
+    "A car accident involving multiple vehicles",
+    "A motorcycle accident involving multiple vehicles",
+    "A damaged vehicle after a collision",
+    "An overturned car on the highway",
+    "A car was hit by a truck",
+    "A car was crushed by rocks",
+    "The car crashed into a pedestrian crossing",
+    "The car hit the road divider",
+    "The truck skidded on the road"
+]
+
+
+#Function to Calculate Probabilities
+def calculate_probabilities(image_path, descriptions):
+    image = Image.open(image_path).convert("RGB")
+    inputs = processor(text=descriptions, images=image, return_tensors="pt", padding=True)
+    inputs = {key: val.to(device) for key, val in inputs.items()}
+    outputs = model(**inputs)
+
+    # Calculate cosine similarity
+    logits_per_image = outputs.logits_per_image  # Image-to-text similarity
+    probs = logits_per_image.softmax(dim=1)  # Convert to probabilities
+    return probs.squeeze().tolist()
+
+#Function to Visualize Probabilities
+def plot_probabilities(descriptions, probabilities, image_path):
+    plt.figure(figsize=(10, 6))
+    plt.barh(descriptions, probabilities, color="skyblue")
+    plt.xlabel("Probability", fontsize=12)
+    plt.ylabel("Descriptions", fontsize=12)
+    plt.title("CLIP Probabilities for Image Descriptions", fontsize=14)
+    plt.xlim(0, 1)
+    plt.gca().invert_yaxis()
+    plt.tight_layout()
+
+    # Display image next to plot
+    img = Image.open(image_path)
+    plt.figure(figsize=(5, 5))
+    plt.imshow(img)
+    plt.axis("off")
+    plt.title("Input Image")
+    plt.show()
+
+probabilities = calculate_probabilities(image_path, descriptions)
+print(f"Image: {os.path.basename(image_path)}")
+for desc, prob in zip(descriptions, probabilities):
+    print(f"  {desc}: {prob:.4f}")
+
+# Visualize the results
+plot_probabilities(descriptions, probabilities, image_path)
+
+image_path = "/content/drive/MyDrive/DATA PENGPOL/data/train normalisasi/Accident/test5_17.jpg"
+display(Image(filename=image_path))
+#Load Model and Processor
+model_name = "openai/clip-vit-base-patch32"
+model = CLIPModel.from_pretrained(model_name)
+processor = CLIPProcessor.from_pretrained(model_name)
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model.to(device)
+
+image_path = "/content/drive/MyDrive/DATA PENGPOL/data/train normalisasi/Accident/test5_17.jpg"
+
+#Define Relevant Captions (Labels)
+descriptions = [
+    "A car accident on a road",
+    "A car accident involving multiple vehicles",
+    "A motorcycle accident involving multiple vehicles",
+    "A damaged vehicle after a collision",
+    "An overturned car on the highway",
+    "A car was hit by a truck",
+    "A car was crushed by rocks",
+    "The car crashed into a pedestrian crossing",
+    "The car hit the road divider",
+    "The truck skidded on the road"
+]
+
+
+#Define Function to Calculate Probabilities
+def calculate_probabilities(image_path, descriptions):
+    image = Image.open(image_path).convert("RGB")
+    inputs = processor(text=descriptions, images=image, return_tensors="pt", padding=True)
+    inputs = {key: val.to(device) for key, val in inputs.items()}
+    outputs = model(**inputs)
+
+    # Calculate cosine similarity
+    logits_per_image = outputs.logits_per_image  # Image-to-text similarity
+    probs = logits_per_image.softmax(dim=1)  # Convert to probabilities
+    return probs.squeeze().tolist()
+
+#Function to Visualize Probabilities
+def plot_probabilities(descriptions, probabilities, image_path):
+    plt.figure(figsize=(10, 6))
+    plt.barh(descriptions, probabilities, color="skyblue")
+    plt.xlabel("Probability", fontsize=12)
+    plt.ylabel("Descriptions", fontsize=12)
+    plt.title("CLIP Probabilities for Image Descriptions", fontsize=14)
+    plt.xlim(0, 1)
+    plt.gca().invert_yaxis()
+    plt.tight_layout()
+
+    # Display image next to plot
+    img = Image.open(image_path)
+    plt.figure(figsize=(5, 5))
+    plt.imshow(img)
+    plt.axis("off")
+    plt.title("Input Image")
+    plt.show()
+
+probabilities = calculate_probabilities(image_path, descriptions)
+print(f"Image: {os.path.basename(image_path)}")
+for desc, prob in zip(descriptions, probabilities):
+    print(f"  {desc}: {prob:.4f}")
+
+# Visualize the results
+plot_probabilities(descriptions, probabilities, image_path)
+
+## accident cosine similarity
+image_path = "/content/drive/MyDrive/DATA PENGPOL/data/train normalisasi/Accident/acc1 (5).jpg"
+display(Image(filename=image_path))
+#Load Model and Processor
+model_name = "openai/clip-vit-base-patch32"
+model = CLIPModel.from_pretrained(model_name)
+processor = CLIPProcessor.from_pretrained(model_name)
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model.to(device)
+
+image_path = "/content/drive/MyDrive/DATA PENGPOL/data/train normalisasi/Accident/acc1 (5).jpg"
+
+#Define Relevant Captions (Labels)
+descriptions = [
+    "A car accident on a road",
+    "A car accident involving multiple vehicles",
+    "A motorcycle accident involving multiple vehicles",
+    "A damaged vehicle after a collision",
+    "An overturned car on the highway",
+    "A car was hit by a truck",
+    "A car was crushed by rocks",
+    "The car crashed into a pedestrian crossing",
+    "The car hit the road divider",
+    "The truck skidded on the road"
+]
+
+# Preprocess and Get Embeddings
+def get_embeddings(image_path, descriptions):
+    image = Image.open(image_path).convert("RGB")
+    inputs = processor(text=descriptions, images=image, return_tensors="pt", padding=True)
+    inputs = {key: val.to(device) for key, val in inputs.items()}
+    outputs = model(**inputs)
+    image_embedding = outputs.image_embeds[0].cpu().detach().numpy()
+    text_embeddings = outputs.text_embeds.cpu().detach().numpy()
+
+    return image_embedding, text_embeddings
+
+image_embedding, text_embeddings = get_embeddings(image_path, descriptions)
+
+#Calculate Cosine Similarity
+similarities = cosine_similarity(
+    image_embedding.reshape(1, -1),
+    text_embeddings
+).flatten()
+
+#Display Results
+for desc, sim in zip(descriptions, similarities):
+    print(f"Description: {desc} | Cosine Similarity: {sim:.4f}")
+
+#Find Best Match
+best_match_idx = np.argmax(similarities)
+print(f"\nBest Match: {descriptions[best_match_idx]} with similarity {similarities[best_match_idx]:.4f}")
+
+image_path = "/content/drive/MyDrive/DATA PENGPOL/data/train normalisasi/Accident/test5_17.jpg"
+display(Image(filename=image_path))
+#Load Model and Processor
+model_name = "openai/clip-vit-base-patch32"
+model = CLIPModel.from_pretrained(model_name)
+processor = CLIPProcessor.from_pretrained(model_name)
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model.to(device)
+
+#Load Single Image
+image_path = "/content/drive/MyDrive/DATA PENGPOL/data/train normalisasi/Accident/test5_17.jpg"   # Ganti dengan path gambar yang ingin diuji
+
+#Define Relevant Captions (Labels)
+descriptions = [
+    "A car accident on a road",
+    "A car accident involving multiple vehicles",
+    "A motorcycle accident involving multiple vehicles",
+    "A damaged vehicle after a collision",
+    "An overturned car on the highway",
+    "A car was hit by a truck",
+    "A car was crushed by rocks",
+    "The car crashed into a pedestrian crossing",
+    "The car hit the road divider",
+    "The truck skidded on the road"
+]
+
+#Preprocess and Get Embeddings
+def get_embeddings(image_path, descriptions):
+    image = Image.open(image_path).convert("RGB")
+    inputs = processor(text=descriptions, images=image, return_tensors="pt", padding=True)
+    inputs = {key: val.to(device) for key, val in inputs.items()}
+    outputs = model(**inputs)
+
+    # Get embeddings
+    image_embedding = outputs.image_embeds[0].cpu().detach().numpy()
+    text_embeddings = outputs.text_embeds.cpu().detach().numpy()
+
+    return image_embedding, text_embeddings
+
+image_embedding, text_embeddings = get_embeddings(image_path, descriptions)
+
+#Calculate Cosine Similarity
+similarities = cosine_similarity(
+    image_embedding.reshape(1, -1),
+    text_embeddings
+).flatten()
+
+#Display Results
+for desc, sim in zip(descriptions, similarities):
+    print(f"Description: {desc} | Cosine Similarity: {sim:.4f}")
+
+#Find Best Match
+best_match_idx = np.argmax(similarities)
+print(f"\nBest Match: {descriptions[best_match_idx]} with similarity {similarities[best_match_idx]:.4f}")
+
+## non accident probability softmax
+from IPython.display import Image, display
+image_path = "/content/drive/MyDrive/DATA PENGPOL/data/train normalisasi/Non Accident/test14_3.jpg"  # Ganti dengan path gambar Anda
+display(Image(filename=image_path))
+import torch
+from PIL import Image
+from transformers import CLIPProcessor, CLIPModel
+import matplotlib.pyplot as plt
+import os
+
+# Step 1: Load Model and Processor
+model_name = "openai/clip-vit-base-patch32"
+model = CLIPModel.from_pretrained(model_name)
+processor = CLIPProcessor.from_pretrained(model_name)
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model.to(device)
+
+# Step 2: Load Single Image
+image_path = "/content/drive/MyDrive/DATA PENGPOL/data/train normalisasi/Non Accident/test14_3.jpg"  # Ganti dengan path gambar yang ingin diuji
+
+# Step 3: Define Relevant Captions (Labels)
+descriptions  = [
+    "A calm street with clear traffic",
+    "A mountain landscape with no traffic",
+    "A busy street with no accidents",
+    "street view after rain with no accidents",
+    "A car parked on the side of the road",
+    "a car was driving on the road safely",
+    "many cars parked on the side of the road"
+]
+
+
+# Step 4: Define Function to Calculate Probabilities
+def calculate_probabilities(image_path, descriptions):
+    # Load image
+    image = Image.open(image_path).convert("RGB")
+    inputs = processor(text=descriptions, images=image, return_tensors="pt", padding=True)
+
+    # Move inputs to device
+    inputs = {key: val.to(device) for key, val in inputs.items()}
+
+    # Get model outputs
+    outputs = model(**inputs)
+
+    # Calculate cosine similarity
+    logits_per_image = outputs.logits_per_image  # Image-to-text similarity
+    probs = logits_per_image.softmax(dim=1)  # Convert to probabilities
+    return probs.squeeze().tolist()
+
+# Step 5: Define Function to Visualize Probabilities
+def plot_probabilities(descriptions, probabilities, image_path):
+    plt.figure(figsize=(10, 6))
+    plt.barh(descriptions, probabilities, color="skyblue")
+    plt.xlabel("Probability", fontsize=12)
+    plt.ylabel("Descriptions", fontsize=12)
+    plt.title("CLIP Probabilities for Image Descriptions", fontsize=14)
+    plt.xlim(0, 1)
+    plt.gca().invert_yaxis()
+    plt.tight_layout()
+
+    # Display image next to plot
+    img = Image.open(image_path)
+    plt.figure(figsize=(5, 5))
+    plt.imshow(img)
+    plt.axis("off")
+    plt.title("Input Image")
+    plt.show()
+
+# Step 6: Run Inference on the Single Image
+probabilities = calculate_probabilities(image_path, descriptions)
+print(f"Image: {os.path.basename(image_path)}")
+for desc, prob in zip(descriptions, probabilities):
+    print(f"  {desc}: {prob:.4f}")
+
+# Visualize the results
+plot_probabilities(descriptions, probabilities, image_path)
+
+## non accident cosine similarity
+from IPython.display import Image, display
+image_path = "/content/drive/MyDrive/DATA PENGPOL/data/train normalisasi/Non Accident/test14_3.jpg"  # Ganti dengan path gambar Anda
+display(Image(filename=image_path))
+import torch
+from PIL import Image
+from transformers import CLIPProcessor, CLIPModel
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+
+# Step 1: Load Model and Processor
+model_name = "openai/clip-vit-base-patch32"
+model = CLIPModel.from_pretrained(model_name)
+processor = CLIPProcessor.from_pretrained(model_name)
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model.to(device)
+
+# Step 2: Load Single Image
+image_path = "/content/drive/MyDrive/DATA PENGPOL/data/train normalisasi/Non Accident/test14_3.jpg"  # Ganti dengan path gambar yang ingin diuji
+
+# Step 3: Define Relevant Captions (Labels)
+descriptions  = [
+    "A calm street with clear traffic",
+    "A mountain landscape with no traffic",
+    "A busy street with no accidents",
+    "street view after rain with no accidents",
+    "A car parked on the side of the road",
+    "a car was driving on the road safely",
+    "many cars parked on the side of the road"
+]
+
+
+# Step 3: Preprocess and Get Embeddings
+def get_embeddings(image_path, descriptions):
+    # Load and preprocess image
+    image = Image.open(image_path).convert("RGB")
+    inputs = processor(text=descriptions, images=image, return_tensors="pt", padding=True)
+
+    # Move inputs to device
+    inputs = {key: val.to(device) for key, val in inputs.items()}
+
+    # Forward pass through the model
+    outputs = model(**inputs)
+
+    # Get embeddings
+    image_embedding = outputs.image_embeds[0].cpu().detach().numpy()  # Shape: (512,)
+    text_embeddings = outputs.text_embeds.cpu().detach().numpy()     # Shape: (len(descriptions), 512)
+
+    return image_embedding, text_embeddings
+
+image_embedding, text_embeddings = get_embeddings(image_path, descriptions)
+
+# Step 4: Calculate Cosine Similarity
+similarities = cosine_similarity(
+    image_embedding.reshape(1, -1),  # Reshape to 2D array
+    text_embeddings                 # Text embeddings already 2D
+).flatten()
+
+# Step 5: Display Results
+for desc, sim in zip(descriptions, similarities):
+    print(f"Description: {desc} | Cosine Similarity: {sim:.4f}")
+
+# Step 6: Find Best Match
+best_match_idx = np.argmax(similarities)
+print(f"\nBest Match: {descriptions[best_match_idx]} with similarity {similarities[best_match_idx]:.4f}")
+
+# model 2
+# Model pertama
+model_name_1 = "openai/clip-vit-base-patch32"
+model_1 = CLIPModel.from_pretrained(model_name_1)
+processor_1 = CLIPProcessor.from_pretrained(model_name_1)
+
+# Model kedua
+model_name_2 = "openai/clip-vit-large-patch14"
+model_2 = CLIPModel.from_pretrained(model_name_2)
+processor_2 = CLIPProcessor.from_pretrained(model_name_2)
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model_1.to(device)
+model_2.to(device)
+
+folder_path = "/content/drive/MyDrive/DATA PENGPOL/data/train normalisasi/Accident"
+csv_path = "/content/clip_probabilities.csv"
+
+data = pd.read_csv(csv_path)
+assert 'Image Path' in data.columns and 'Best Description' in data.columns, "CSV harus memiliki kolom 'image_name' dan 'description'"
+data['Image Path'] = data['Image Path'].apply(lambda x: os.path.join(folder_path, x))
+
+def process_inputs(processor, image_path, description):
+    image = Image.open(image_path).convert("RGB")
+    inputs = processor(
+        text=[description], images=image, return_tensors="pt", padding=True
+    )
+    return {k: v.to(device) for k, v in inputs.items()}
+
+results = []
+
+for idx, row in data.iterrows():
+    try:
+        # Proses data untuk model 1
+        inputs_1 = process_inputs(processor_1, row['Image Path'], row['Best Description'])
+        outputs_1 = model_1(**inputs_1)
+        score_1 = outputs_1.logits_per_image.item()
+
+        # Proses data untuk model 2
+        inputs_2 = process_inputs(processor_2, row['Image Path'], row['Best Description'])
+        outputs_2 = model_2(**inputs_2)
+        score_2 = outputs_2.logits_per_image.item()
+
+        # Save results
+        results.append({
+            "Image Path": row['Image Path'],
+            "Best Description": row['Best Description'],
+            "score_model_1": score_1,
+            "score_model_2": score_2
+        })
+
+    except Exception as e:
+        print(f"Error processing {row['Image Path']}: {e}")
+
+results_df = pd.DataFrame(results)
+results_df.to_csv("comparison_results.csv", index=False)
+print(results_df.head())
+results_df['score_difference'] = results_df['score_model_2'] - results_df['score_model_1']
+print(results_df[['Image Path', 'score_difference']].head())
+avg_score_model_1 = results_df['score_model_1'].mean()
+avg_score_model_2 = results_df['score_model_2'].mean()
+print(f"Average Score Model 1: {avg_score_model_1}")
+print(f"Average Score Model 2: {avg_score_model_2}")
+import time
+
+start_time = time.time()
+for idx, row in data.iterrows():
+    inputs_1 = process_inputs(processor_1, row['Image Path'], row['Best Description'])
+    outputs_1 = model_1(**inputs_1)
+print(f"Model 1 Time: {time.time() - start_time}")
+
+start_time = time.time()
+for idx, row in data.iterrows():
+    inputs_2 = process_inputs(processor_2, row['Image Path'], row['Best Description'])
+    outputs_2 = model_2(**inputs_2)
+print(f"Model 2 Time: {time.time() - start_time}")
+
+# evaluasi code (referensi code Bu Ade)
+!pip install git+https://github.com/openai/CLIP.git
+!pip install torch torchvision
+!pip install transformers
+import torch
+from transformers import CLIPModel, CLIPProcessor
+from tqdm.auto import tqdm
+import clip
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
+model, preprocess = clip.load("ViT-B/32")
+transform = transforms.Compose([  # Ubah ukuran gambar
+    transforms.ToTensor()       # Ubah ke tensor
+])
+df = "/content/drive/MyDrive/DATA PENGPOL/data/train normalisasi/Accident"
+dataset = datasets.ImageFolder(root=df, transform = transform)
+# Buat DataLoader
+loader = DataLoader(dataset, batch_size=32, shuffle=True)
+def zeroshot_classifier(classnames, templates):
+    """
+    This function generates the zeroshot weights for the given class names and templates.
+    """
+    with torch.no_grad():
+        zeroshot_weights = []
+        for classname in tqdm(classnames):  # Using tqdm for progress bar
+            texts = [template.format(classname) for template in templates]
+            texts = clip.tokenize(texts)
+            class_embeddings = model.encode_text(texts)
+            class_embeddings /= class_embeddings.norm(dim=-1, keepdim=True)
+            class_embedding = class_embeddings.mean(dim=0)
+            class_embedding /= class_embedding.norm()
+            zeroshot_weights.append(class_embedding)
+        zeroshot_weights = torch.stack(zeroshot_weights, dim=1)
+    return zeroshot_weights
+
+imagenet_classes = [
+    "A car accident on a road",
+    "A car accident involving multiple vehicles",
+    "A motorcycle accident involving multiple vehicles",
+    "A damaged vehicle after a collision",
+    "An overturned car on the highway",
+    "Emergency services responding to a road accident",
+    "A photo of a traffic jam caused by an accident",
+]
+imagenet_templates = ["{}"]
+
+zeroshot_weights = zeroshot_classifier(imagenet_classes, imagenet_templates)
+def accuracy(output, target, topk=(1,)):
+    pred = output.topk(max(topk), 1, True, True)[1].t()
+    correct = pred.eq(target.view(1, -1).expand_as(pred))
+    return [float(correct[:k].reshape(-1).float().sum(0, keepdim=True).cpu().numpy()) for k in topk]
+with torch.no_grad():
+    top1, top5, n = 0., 0., 0.
+    for i, (images, target) in enumerate(tqdm(loader)):
+        images = images
+        target = target
+        image_features = model.encode_image(images)
+        image_features /= image_features.norm(dim=-1, keepdim=True)
+        logits = 100. * image_features @ zeroshot_weights
+
+        # measure accuracy
+        acc1, acc5 = accuracy(logits, target, topk=(1, 5))
+        top1 += acc1
+        top5 += acc5
+        n += images.size(0)
+
+top1 = (top1 / n) * 100
+top5 = (top5 / n) * 100
+
+print(f"Top-1 accuracy: {top1:.2f}")
+print(f"Top-5 accuracy: {top5:.2f}")
