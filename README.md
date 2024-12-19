@@ -7,7 +7,7 @@
 5. 121450094 - Syifa Firnanda  
 6. 121450030 - Pramudya Wibowo
 
-## Pendahuluan
+## Introduction
 Deteksi gambar kecelakaan merupakan langkah penting untuk mendukung sistem respons cepat dalam situasi darurat. Penelitian ini menggunakan dataset dari Kaggle, berjudul **Accident Detection From CCTV Footage** oleh Charan Kumar, yang berisi rekaman CCTV untuk mendeteksi kecelakaan lalu lintas melalui analisis gambar. Dataset tersebut awalnya terdiri dari tiga folder: latih, uji, dan validasi, dengan dua kelas, yaitu **Accident** dan **Non-Accident**. Penelitian ini hanya menggunakan satu folder dataset tanpa pembagian data (split), terdiri dari 350 gambar untuk kelas **Accident** dan 350 gambar untuk kelas **Non-Accident**.
 
 Model yang digunakan adalah **Contrastive Language–Image Pre-training (CLIP)** dengan pendekatan **zero-shot**, sehingga tidak memerlukan pelatihan ulang pada dataset spesifik. CLIP bekerja dengan menggabungkan embedding multi-modal dari teks dan gambar, sehingga memungkinkan deteksi berbasis deskripsi teks. Sebelum digunakan oleh model, gambar-gambar dipreproses dengan resize ke ukuran **224x224 piksel** untuk memastikan konsistensi dimensi input dan memaksimalkan performa. Setelah itu, data gambar dinormalisasi ke rentang nilai **[-1, 1]** dengan mean dan standar deviasi sebesar **0.5**. Selanjutnya, kandidat deskripsi didefinisikan untuk masing-masing kelas sebagai bagian dari proses analisis.
