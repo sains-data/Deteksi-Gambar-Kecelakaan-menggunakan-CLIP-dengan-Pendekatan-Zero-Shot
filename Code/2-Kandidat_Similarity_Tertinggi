@@ -1,0 +1,152 @@
+# Kandidat similarity tertinggi
+## Accident
+#Load Model and Processor
+model_name = "openai/clip-vit-base-patch32"
+model = CLIPModel.from_pretrained(model_name)
+processor = CLIPProcessor.from_pretrained(model_name)
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model.to(device)
+
+#Load Dataset
+image_folder = "/content/drive/MyDrive/DATA PENGPOL/data/train normalisasi/Accident"  # Ganti dengan path folder gambar
+image_paths = [os.path.join(image_folder, fname) for fname in os.listdir(image_folder) if fname.endswith(".jpg")]
+
+#Define Relevant Captions (Labels)
+descriptions = [
+    "A car accident on a road",
+    "A car accident involving multiple vehicles",
+    "A motorcycle accident involving multiple vehicles",
+    "A damaged vehicle after a collision",
+    "An overturned car on the highway",
+    "A car was hit by a truck",
+    "A car was crushed by rocks",
+    "The car crashed into a pedestrian crossing",
+    "The car hit the road divider",
+    "The truck skidded on the road"
+]
+
+#Function to Calculate Probabilities
+def calculate_probabilities(image_path, descriptions):
+    image = Image.open(image_path).convert("RGB")
+    inputs = processor(text=descriptions, images=image, return_tensors="pt", padding=True)
+    inputs = {key: val.to(device) for key, val in inputs.items()}
+    outputs = model(**inputs)
+
+    # Calculate cosine similarity
+    logits_per_image = outputs.logits_per_image  # Image-to-text similarity
+    probs = logits_per_image.softmax(dim=1)  # Convert to probabilities
+    return probs.squeeze().tolist()
+
+#Function to Visualize Probabilities
+def plot_probabilities(descriptions, probabilities, image_path):
+    plt.figure(figsize=(10, 6))
+    plt.barh(descriptions, probabilities, color="skyblue")
+    plt.xlabel("Probability", fontsize=12)
+    plt.ylabel("Descriptions", fontsize=12)
+    plt.title("CLIP Probabilities for Image Descriptions", fontsize=14)
+    plt.xlim(0, 1)
+    plt.gca().invert_yaxis()
+    plt.tight_layout()
+
+    # Display image next to plot
+    img = Image.open(image_path)
+    plt.figure(figsize=(5, 5))
+    plt.imshow(img)
+    plt.axis("off")
+    plt.title("Input Image")
+    plt.show()
+
+results = []
+
+for image_path in image_paths:
+    probabilities = calculate_probabilities(image_path, descriptions)
+    print(f"Image: {os.path.basename(image_path)}")
+
+    #description with the highest probability
+    max_prob_idx = probabilities.index(max(probabilities))
+    best_description = descriptions[max_prob_idx]
+    highest_probability = probabilities[max_prob_idx]
+    plot_probabilities(descriptions, probabilities, image_path)
+
+#Save Results to CSV
+df = pd.DataFrame(results, columns=["Image Path", "Best Description", "Highest Probability"])
+output_csv = "clip_probabilities.csv"
+df.to_csv(output_csv, index=False)
+
+print(f"Results have been saved to {output_csv}")
+
+## Non Accident
+#Load Model and Processor
+model_name = "openai/clip-vit-base-patch32"
+model = CLIPModel.from_pretrained(model_name)
+processor = CLIPProcessor.from_pretrained(model_name)
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model.to(device)
+
+#Load Dataset
+image_folder = "/content/drive/MyDrive/DATA PENGPOL/data/train normalisasi/Non Accident"  # Ganti dengan path folder gambar
+image_paths = [os.path.join(image_folder, fname) for fname in os.listdir(image_folder) if fname.endswith(".jpg")]
+
+#Define Relevant Captions (Labels)
+
+descriptions  = [
+    "A calm street with clear traffic",
+    "A mountain landscape with no traffic",
+    "A busy street with no accidents",
+    "street view after rain with no accidents",
+    "A car parked on the side of the road",
+    "a car was driving on the road safely",
+    "many cars parked on the side of the road"
+]
+
+
+#Function to Calculate Probabilities
+def calculate_probabilities(image_path, descriptions):
+    image = Image.open(image_path).convert("RGB")
+    inputs = processor(text=descriptions, images=image, return_tensors="pt", padding=True)
+    inputs = {key: val.to(device) for key, val in inputs.items()}
+    outputs = model(**inputs)
+
+    # Calculate cosine similarity
+    logits_per_image = outputs.logits_per_image  # Image-to-text similarity
+    probs = logits_per_image.softmax(dim=1)  # Convert to probabilities
+    return probs.squeeze().tolist()
+
+#Function to Visualize Probabilities
+def plot_probabilities(descriptions, probabilities, image_path):
+    plt.figure(figsize=(10, 6))
+    plt.barh(descriptions, probabilities, color="skyblue")
+    plt.xlabel("Probability", fontsize=12)
+    plt.ylabel("Descriptions", fontsize=12)
+    plt.title("CLIP Probabilities for Image Descriptions", fontsize=14)
+    plt.xlim(0, 1)
+    plt.gca().invert_yaxis()
+    plt.tight_layout()
+
+    # Display image next to plot
+    img = Image.open(image_path)
+    plt.figure(figsize=(5, 5))
+    plt.imshow(img)
+    plt.axis("off")
+    plt.title("Input Image")
+    plt.show()
+
+results = []
+
+for image_path in image_paths:
+    probabilities = calculate_probabilities(image_path, descriptions)
+    print(f"Image: {os.path.basename(image_path)}")
+
+    #description with the highest probability
+    max_prob_idx = probabilities.index(max(probabilities))
+    best_description = descriptions[max_prob_idx]
+    highest_probability = probabilities[max_prob_idx]
+    results.append([image_path, best_description, highest_probability])
+    plot_probabilities(descriptions, probabilities, image_path)
+
+#Save Results to CSV
+df = pd.DataFrame(results, columns=["Image Path", "Best Description", "Highest Probability"])
+output_csv = "clip_probabilities_nonacc.csv"
+df.to_csv(output_csv, index=False)
+
+print(f"Results have been saved to {output_csv}")
